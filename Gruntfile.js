@@ -27,6 +27,9 @@ module.exports = function(grunt) {
     nodemon: {
       dev: {
         script: 'server.js'
+      },
+      prod: {
+        script: ''
       }
     },
 
@@ -84,6 +87,12 @@ module.exports = function(grunt) {
     shell: {
       prodServer: {
         command: 'git push live master'
+      },
+      npmInstall: {
+        command: 'npm install'
+      },
+      runServer: {
+        command: 'node server.js'
       }
     },
   });
@@ -118,10 +127,11 @@ module.exports = function(grunt) {
 
   grunt.registerTask('deploy', function(n) {
     if (grunt.option('prod')) {
-      grunt.task.run(['test', 'shell']);
+      grunt.task.run(['test', 'shell:prodServer']);
     } else {
       grunt.task.run(['server-dev']);
     }
   });
+
 
 };
