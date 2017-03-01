@@ -6,6 +6,7 @@ window.Shortly = Backbone.View.extend({
     'click li a.create': 'renderCreateView'
   },
 
+
   initialize: function() {
     console.log( 'Shortly is running' );
     $('body').append(this.render().el);

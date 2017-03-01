@@ -3,6 +3,16 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     concat: {
+      options: {
+        separator: ';'
+      },
+      target: {
+        src: [
+          'public/client/**/*.js',
+          'public/lib/**/*.js',
+        ],
+        dest: 'public/dist/prod.js'
+      }
     },
 
     mochaTest: {
@@ -21,15 +31,27 @@ module.exports = function(grunt) {
     },
 
     uglify: {
+      target: {
+        files: {
+          'public/dist/prod.min.js': ['public/dist/prod.js']
+        }
+      }
     },
 
     eslint: {
+      options: {
+        configFile: '.eslintrc.js'
+      },
       target: [
-        // Add list of files to lint here
+        '**/*.js'
       ]
     },
 
     cssmin: {
+      files: {
+        src: ['public/*.css'],
+        dest: 'public/dist/styles.min.css'
+      }
     },
 
     watch: {
@@ -44,13 +66,24 @@ module.exports = function(grunt) {
         ]
       },
       css: {
-        files: 'public/*.css',
+        files: ['public/*.css'],
         tasks: ['cssmin']
       }
     },
 
+    concurrent: {
+      options: {
+        logConcurrentOutput: true
+      },
+      devServer: [
+        'nodemon',
+        'watch'
+      ]
+    },
+
     shell: {
       prodServer: {
+        command: 'git push live master'
       }
     },
   });
@@ -63,9 +96,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-nodemon');
+  grunt.loadNpmTasks('grunt-concurrent');
 
   grunt.registerTask('server-dev', function (target) {
-    grunt.task.run([ 'nodemon', 'watch' ]);
+    grunt.task.run([ 'build', 'concurrent' ]);
   });
 
   ////////////////////////////////////////////////////
@@ -77,19 +111,17 @@ module.exports = function(grunt) {
   ]);
 
   grunt.registerTask('build', [
+    'concat',
+    'uglify',
+    'cssmin'
   ]);
 
-  grunt.registerTask('upload', function(n) {
+  grunt.registerTask('deploy', function(n) {
     if (grunt.option('prod')) {
-      // add your production server task here
+      grunt.task.run(['test', 'shell']);
     } else {
-      grunt.task.run([ 'server-dev' ]);
+      grunt.task.run(['server-dev']);
     }
   });
-
-  grunt.registerTask('deploy', [
-    // add your deploy tasks here
-  ]);
-
 
 };
